@@ -3,6 +3,7 @@ package com.misterchan.pronunciation;
 import android.database.CursorJoiner;
 import android.graphics.Color;
 import android.icu.util.Measure;
+import android.media.MediaDrm;
 import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
@@ -118,7 +119,40 @@ public class QueryingThread extends Thread {
     }
 
     private String jyutpingToIpa(String jyutping) {
-        return "[" + jyutping + "]";
+        return "["
+                + jyutping
+                .replaceAll("(?<=^|[^a-z])(?=a|e|o|uk|ung)", "ʔ")
+                .replaceAll("eoi", "ɵy̯")
+                .replaceAll("eo", "ɵ")
+                .replaceAll("oe", "œː")
+                .replaceAll("(?<=[aeou]i|[aeio]u)", "̯")
+                .replaceAll("yu", "yː")
+                .replaceAll("i(?=[umpnt]?\\d)", "iː")
+                .replaceAll("u(?=[int]?\\d)", "uː")
+                .replaceAll("(?<=[^a])a(?=[^a])", "ɐ")
+                .replaceAll("aa", "aː")
+                .replaceAll("e(?=(?:u|m|ng|k)|\\d)", "ɛː")
+                .replaceAll("o(?=(?:i|m|n|ng|k)|\\d)", "ɔː")
+                .replaceAll("i(?=ng|k)", "e")
+                .replaceAll("u(?=ng|k)", "o")
+                .replaceAll("(?<=[gk])w", "ʷ")
+                .replaceAll("(?<=^[ptk])", "ʰ")
+                .replaceAll("ʰʷ", "ʷʰ")
+                .replaceAll("c", "t͡sʰ")
+                .replaceAll("(?<=[ptk])(?=\\d)", "̚")
+                .replaceAll("b", "p")
+                .replaceAll("d", "t")
+                .replaceAll("z", "t͡s")
+                .replaceAll("ng", "ŋ")
+                .replaceAll("g", "k")
+                .replaceAll("(?<=[ptk]̚)1", "˥")
+                .replaceAll("1", "˥˧")
+                .replaceAll("2", "˧˥")
+                .replaceAll("3", "˧")
+                .replaceAll("4", "˨˩")
+                .replaceAll("5", "˦˥")
+                .replaceAll("6", "˨")
+                + "]";
     }
 
     private String jyutpingToSpecifiedSchema(String jyutping) {
@@ -128,7 +162,7 @@ public class QueryingThread extends Thread {
     private String jyutpingToSpecifiedSchema(String jyutping, boolean ipa) {
         switch (schema) {
             case Schemas.JYUTPING:
-                return jyutping + (ipa ? "[" + jyutping + "]" : "");
+                return jyutping + (ipa ? " " + jyutpingToIpa(jyutping) : "");
             case Schemas.IPA:
                 return jyutpingToIpa(jyutping);
         }
@@ -178,7 +212,7 @@ public class QueryingThread extends Thread {
                 }
 
                 int ps = prons.size(), es = expls.size();
-                if (ps != es) {
+                if (ps < es) {
                     prons.clear();
                     prons.offer("匹配讀音與解釋失敗");
                     expls.clear();
@@ -186,15 +220,13 @@ public class QueryingThread extends Thread {
                 }
 
                 mainActivity.runOnUiThread(() -> {
-                    TextView tv;
                     while (!prons.isEmpty()) {
-                        tv = new TextView(mainActivity);
-                        tv.setText(prons.poll());
-                        tv.setTextAppearance(androidx.appcompat.R.style.TextAppearance_AppCompat_Large);
-                        mainActivity.llResult.addView(tv);
-                        tv = new TextView(mainActivity);
-                        tv.setText(expls.poll());
-                        mainActivity.llResult.addView(tv);
+                        LinearLayout layout = (LinearLayout) mainActivity.layoutInflater.inflate(R.layout.result, null);
+                        ((TextView) layout.findViewById(R.id.tv_pron)).setText(prons.poll());
+                        if (!expls.isEmpty()) {
+                            ((TextView) layout.findViewById(R.id.tv_expl)).setText(expls.poll());
+                        }
+                        mainActivity.llResult.addView(layout);
                     }
                 });
 

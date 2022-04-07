@@ -3,6 +3,7 @@ package com.misterchan.pronunciation;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -14,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button bQuery;
     EditText etText;
+    LayoutInflater layoutInflater;
     LinearLayout llResult;
     Spinner sSchema;
     Spinner sURL;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         bQuery = findViewById(R.id.b_query);
         etText = findViewById(R.id.et_text);
+        layoutInflater = LayoutInflater.from(this);
         llResult = findViewById(R.id.ll_result);
         sSchema = findViewById(R.id.s_schema);
         sURL = findViewById(R.id.s_url);
