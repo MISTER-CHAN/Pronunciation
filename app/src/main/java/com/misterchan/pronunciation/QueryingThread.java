@@ -305,6 +305,7 @@ public class QueryingThread extends Thread {
                     while (prons != null && !prons.isEmpty()) {
                         TextView tvPron = new TextView(mainActivity);
                         tvPron.setLayoutParams(LAYOUT_PARAMS);
+                        tvPron.setPadding(0, 8, 0, 0);
                         tvPron.setText(prons.poll());
                         character.addView(tvPron);
                     }
